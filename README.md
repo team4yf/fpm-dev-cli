@@ -14,7 +14,7 @@ npm i -g fpm-cms-dev-cli
 
 ### Useage
 ```bash
-fpm-cms ng1 update
+fpm-cms update
 ```
 
 it will update the lasted template project from github
