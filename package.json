@@ -4,7 +4,7 @@
   "description": "fpm-cms-dev-cli",
   "main": "cli.js",
   "scripts": {
-    "test": "node ./cli.js ng1"
+    "test": "node ./cli.js -v update"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,10 @@
   "homepage": "https://github.com/team4yf/fpm-cms-dev-cli#readme",
   "dependencies": {
     "commander": "^2.9.0",
-    "download-git-repo": "^1.0.2"
+    "download-git-repo": "^1.0.2",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "debug": "^4.1.1"
   }
 }

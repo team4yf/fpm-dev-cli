@@ -2,113 +2,121 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
+const _ = require('lodash');
 const program = require('commander');
-const version = require('./package.json').version;
+const debug = require('debug')('fpm-cms-dev-cli')
+const VERSION = require('./package.json').version;
 const download = require('download-git-repo');
 
 const dir = process.cwd();
 const local = __dirname;
-const TEMPLATE_DIR = path.join(local, 'template', 'fpm-cms-ng1');
 
-const NG1_GIT_REP = 'team4yf/fpm-cms-ng1-starter';
+const TEMPLATE_DIR = {
+  'ng1': path.join(local, 'template', 'fpm-cms-ng1')
+}
 
-program.version(version);
+const GIT_REP = {
+  'ng1': 'team4yf/fpm-cms-ng1-starter',
+}
 
 const deletedir = (dir) => {
-    if(!fs.existsSync(dir)) {
-        return
+  if(!fs.existsSync(dir)) {
+    return
+  }
+  let files = []
+  files = fs.readdirSync(dir)
+  files.forEach((file) => {
+    let curPath = path.join(dir, file)
+    if(fs.statSync(curPath).isDirectory()) { // recurse
+      deletedir(curPath)
+    } else { // delete file
+      fs.unlinkSync(curPath)
     }
-    let files = []
-    files = fs.readdirSync(dir)
-    files.forEach((file, index) => {
-        let curPath = path.join(dir, file)
-        if(fs.statSync(curPath).isDirectory()) { // recurse
-            deletedir(curPath)
-        } else { // delete file
-            fs.unlinkSync(curPath)
-        }
-    })
-    fs.rmdirSync(dir)
+  })
+  fs.rmdirSync(dir)
 }
 
 const copydir = (src, dest) => {
-    fs.mkdirSync(dest)
-    let files = fs.readdirSync(src)
-    let readable, writable, curPath, destPath
-    files.forEach(file => {
-        curPath = path.join(src, file)
-        destPath = path.join( dest, file)
-        if(fs.statSync(curPath).isDirectory()) { // recurse
-            copydir(curPath, destPath)
-        } else {
-            fs.copyFileSync(curPath, destPath)
-        }
-    })
+  fs.mkdirSync(dest)
+  let files = fs.readdirSync(src)
+  let curPath, destPath
+  files.forEach(file => {
+    curPath = path.join(src, file)
+    destPath = path.join( dest, file)
+    if(fs.statSync(curPath).isDirectory()) { // recurse
+      copydir(curPath, destPath)
+    } else {
+      fs.copyFileSync(curPath, destPath)
+    }
+  })
 
 }
 
+const init = (projName) => {
+  const projPkgPath = path.join(dir, projName, 'package.json')
+  const pkginfo = require(projPkgPath)
+  pkginfo.name = projName
+  pkginfo.description = `A Project Named [${ projName }] For YF-FPM-SERVER~`
 
-const rename = (plugin) => {
-    fs.rename('fpm-plugin-dev-template-master', 'fpm-plugin-' + (plugin || 'noname'), (err) => {
-        if(err) console.log(err)
-    })
+  fs.writeFile(projPkgPath, JSON.stringify(pkginfo, null, 2), function(err){
+    if(err){
+      console.error(err);
+      return;
+    }
+    console.info('Init Ok , Enjoy It');
+  })
 }
+
+
+program.version(VERSION)
+
+let template = 'ng1';
+program.option('-t, --template <template>', 'use a template to create project, default ng1')
+// template = program.template;
+// debug('Args %s',  template)
 
 program.command('update')
-    .description('update the fpm plugin template project')
-    .action(function(){
-        if(fs.existsSync(TEMPLATE_DIR)){
-            // remove
-            console.info('Remove The Older Template Project.')
-            deletedir(TEMPLATE_DIR)
-        }
-        console.info('Download The Lasted Template Project.')
-        download(NG1_GIT_REP, TEMPLATE_DIR, function(err){
-            if(err){
-                console.error(err);
-                return;
-            }
-            console.info('Download Ok');
-        })
+  .description('update the fpm cms template project')
+  .action(() =>{
+    debug('Run update command: %O, %O', template, TEMPLATE_DIR[template])
+    if(fs.existsSync(TEMPLATE_DIR[template])){
+      // remove
+      console.info('Remove The Older Template Project.')
+      deletedir(TEMPLATE_DIR[template])
+    }
+    console.info('Download The Lasted Template Project.')
+    download(GIT_REP[template], TEMPLATE_DIR[template], (err) => {
+      if(err){
+        console.error(err);
+        return;
+      }
+      console.info('Download Ok');
     })
+  })
 
-const init = (cmsProjectName) => {
-    const pluginPkgPath = path.join(dir, cmsProjectName, 'package.json')
-    const pkginfo = require(pluginPkgPath)
-    pkginfo.name = cmsProjectName
-    pkginfo.description = `A Plugin Named [${ cmsProjectName }] For YF-FPM-SERVER~`
-
-    fs.writeFile(pluginPkgPath, JSON.stringify(pkginfo, null, 2), function(err){
-        if(err){
-            console.error(err);
-            return;
-        }
-        console.info('Init Ok , Enjoy It');
+program.command('create')
+  .description('create the fpm cms template project')
+  .action(() =>{
+    const cmsName = options
+    const cmsProjectName = 'fpm-cms-' + cmsName
+    const cmsProjectPath = path.join(dir, cmsProjectName)
+    if(fs.existsSync(TEMPLATE_DIR[template])){
+      // copy from disk
+      copydir(TEMPLATE_DIR[template], cmsProjectPath);
+      init(cmsProjectName)
+      return;
+    }
+    console.info('Download The Lasted Template Project.')
+    download(GIT_REP[template], TEMPLATE_DIR[template], (err) => {
+      if(err){
+        console.error(err);
+        return;
+      }
+      copydir(TEMPLATE_DIR[template], cmsProjectPath);
+      init(cmsProjectName)
     })
-}
-
-program.command('ng1')
-    .description('Init the fpm cms project')
-    .action(function(options) {
-        const cmsName = options
-        const cmsProjectName = 'fpm-cms-' + cmsName
-        const cmsProjectPath = path.join(dir, cmsProjectName)
-        if(fs.existsSync(TEMPLATE_DIR)){
-            // copy from disk
-            copydir(TEMPLATE_DIR, cmsProjectPath);
-            init(cmsProjectName, cmsProjectPath)
-            return;
-        }
-        console.info('Download The Lasted Template Project.')
-        download(NG1_GIT_REP, TEMPLATE_DIR, function(err){
-            if(err){
-                console.error(err);
-                return;
-            }
-            copydir(TEMPLATE_DIR, cmsProjectPath);
-            init(cmsProjectName, cmsProjectPath)
-        })
-    });
+  })
 
 
-program.parse(process.argv);
+
+  .parse(process.argv);
