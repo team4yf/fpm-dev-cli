@@ -28,3 +28,4 @@ starter/
 *.zip
 template/
 fpm-cms-*
+package-lock.json

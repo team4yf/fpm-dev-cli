@@ -1,6 +1,6 @@
 {
   "name": "fpm-cms-dev-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "fpm-cms-dev-cli",
   "main": "cli.js",
   "scripts": {

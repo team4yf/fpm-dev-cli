@@ -14,15 +14,17 @@ npm i -g fpm-cms-dev-cli
 
 ### Useage
 ```bash
-fpm-cms update
+# fpm-cms update <template>
+fpm-cms update ng1
 ```
 
 it will update the lasted template project from github
 
 ```bash
-fpm-cms ng1 sms
+# fpm-cms create <proj> -t <template> -P
+fpm-cms create admin -t ng1 -P
 ```
 
-it will create a project named `fpm-cms-sms`
+it will create a project named `admin`
 
 then you can dev the project

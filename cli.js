@@ -69,17 +69,21 @@ const init = (projName) => {
 
 
 program.version(VERSION)
-
-let template = 'ng1';
-program.option('-t, --template <template>', 'use a template to create project, default ng1')
-// template = program.template;
+  // .option('-t, --template <template>', 'use a template to create project, default ng1')
 // debug('Args %s',  template)
 
-program.command('update')
+program.command('update [template]')
   .description('update the fpm cms template project')
-  .action(() =>{
-    debug('Run update command: %O, %O', template, TEMPLATE_DIR[template])
+  .option('-f, --force', 'use a template to create project, default ng1')
+  .action((template, options) =>{
+    const { force = false } = options;
+    debug('Run update command: %O, %O, Template Proj path: %s', template, force, TEMPLATE_DIR[template])
     if(fs.existsSync(TEMPLATE_DIR[template])){
+      if(!force){
+        // use the cached
+        console.info('Use the cached project.')
+        return;
+      }
       // remove
       console.info('Remove The Older Template Project.')
       deletedir(TEMPLATE_DIR[template])
@@ -94,11 +98,14 @@ program.command('update')
     })
   })
 
-program.command('create')
+program.command('create [cmsName]')
   .description('create the fpm cms template project')
-  .action(() =>{
-    const cmsName = options
-    const cmsProjectName = 'fpm-cms-' + cmsName
+  .option('-t, --template <template>', 'use a template to create project, default ng1')
+  .option('-P, --no-prefix', 'without fpm-cms prefix')
+  .action((cmsName, options) =>{
+    const { template = 'ng1', prefix = true } = options;
+    debug('Run create command: %s, %s', cmsName, template)
+    const cmsProjectName = `${prefix?'fpm-cms-':''}${cmsName}`
     const cmsProjectPath = path.join(dir, cmsProjectName)
     if(fs.existsSync(TEMPLATE_DIR[template])){
       // copy from disk
@@ -119,4 +126,4 @@ program.command('create')
 
 
 
-  .parse(process.argv);
+program.parse(process.argv);
