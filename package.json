@@ -1,6 +1,6 @@
 {
   "name": "fpm-dev-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "用于创建FPM模板项目的脚手架工具",
   "main": "cli.js",
   "scripts": {
@@ -27,9 +27,7 @@
   "dependencies": {
     "commander": "^2.9.0",
     "download-git-repo": "^1.0.2",
-    "lodash": "^4.17.11"
-  },
-  "devDependencies": {
+    "lodash": "^4.17.11",
     "debug": "^4.1.1"
   }
 }
