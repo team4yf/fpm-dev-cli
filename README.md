@@ -1,9 +1,9 @@
-## fpm-cms-dev-cli
-用于创建fpm-cms插件项目的脚手架
+## fpm-dev-cli
+用于创建fpm模板项目的脚手架
 
 ### Install
 ```bash
-npm i -g fpm-cms-dev-cli
+npm i -g fpm-dev-cli
 ```
 
 ### Templates
@@ -15,14 +15,14 @@ npm i -g fpm-cms-dev-cli
 ### Useage
 ```bash
 # fpm-cms update <template>
-fpm-cms update ng1
+fpm-dev update cms-ng1
 ```
 
 it will update the lasted template project from github
 
 ```bash
 # fpm-cms create <proj> -t <template> -P
-fpm-cms create admin -t ng1 -P
+fpm-dev create admin -t cms-ng1 -P
 ```
 
 it will create a project named `admin`

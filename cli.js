@@ -4,19 +4,18 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const program = require('commander');
-const debug = require('debug')('fpm-cms-dev-cli')
+const debug = require('debug')('fpm-dev-cli')
 const VERSION = require('./package.json').version;
 const download = require('download-git-repo');
 
 const dir = process.cwd();
 const local = __dirname;
 
-const TEMPLATE_DIR = {
-  'ng1': path.join(local, 'template', 'fpm-cms-ng1')
-}
-
-const GIT_REP = {
-  'ng1': 'team4yf/fpm-cms-ng1-starter',
+const getPath = template => {
+  return {
+    localDir: path.join(local, 'template', `fpm-${template}`),
+    gitRep: `team4yf/fpm-${template}-starter`,
+  }
 }
 
 const deletedir = (dir) => {
@@ -56,7 +55,7 @@ const init = (projName) => {
   const projPkgPath = path.join(dir, projName, 'package.json')
   const pkginfo = require(projPkgPath)
   pkginfo.name = projName
-  pkginfo.description = `A Project Named [${ projName }] For YF-FPM-SERVER~`
+  pkginfo.description = `A Project Named [${ projName }] Created by fpm-dev-cli`
 
   fs.writeFile(projPkgPath, JSON.stringify(pkginfo, null, 2), function(err){
     if(err){
@@ -69,16 +68,15 @@ const init = (projName) => {
 
 
 program.version(VERSION)
-  // .option('-t, --template <template>', 'use a template to create project, default ng1')
-// debug('Args %s',  template)
 
 program.command('update [template]')
-  .description('update the fpm cms template project')
-  .option('-f, --force', 'use a template to create project, default ng1')
+  .description('update the fpm template project')
+  .option('-f, --force', 'force to download the lasted template proj')
   .action((template, options) =>{
     const { force = false } = options;
-    debug('Run update command: %O, %O, Template Proj path: %s', template, force, TEMPLATE_DIR[template])
-    if(fs.existsSync(TEMPLATE_DIR[template])){
+    const { gitRep, localDir } = getPath(template);
+    debug('Run update command: %O, %O, Template Proj path: %s', template, force, localDir)
+    if(fs.existsSync(localDir)){
       if(!force){
         // use the cached
         console.info('Use the cached project.')
@@ -86,10 +84,10 @@ program.command('update [template]')
       }
       // remove
       console.info('Remove The Older Template Project.')
-      deletedir(TEMPLATE_DIR[template])
+      deletedir(localDir)
     }
     console.info('Download The Lasted Template Project.')
-    download(GIT_REP[template], TEMPLATE_DIR[template], (err) => {
+    download(gitRep, localDir, (err) => {
       if(err){
         console.error(err);
         return;
@@ -98,29 +96,30 @@ program.command('update [template]')
     })
   })
 
-program.command('create [cmsName]')
-  .description('create the fpm cms template project')
-  .option('-t, --template <template>', 'use a template to create project, default ng1')
-  .option('-P, --no-prefix', 'without fpm-cms prefix')
-  .action((cmsName, options) =>{
-    const { template = 'ng1', prefix = true } = options;
-    debug('Run create command: %s, %s', cmsName, template)
-    const cmsProjectName = `${prefix?'fpm-cms-':''}${cmsName}`
-    const cmsProjectPath = path.join(dir, cmsProjectName)
-    if(fs.existsSync(TEMPLATE_DIR[template])){
+program.command('create [name]')
+  .description('create the fpm template project')
+  .option('-t, --template <template>', 'use a template to create project, default cms-ng1')
+  .option('-P, --no-prefix', 'without fpm- prefix')
+  .action((name, options) =>{
+    const { template = 'cms-ng1', prefix = true } = options;
+    const { gitRep, localDir } = getPath(template);
+    debug('Run create command: %s, %s', name, template)
+    const projName = `${prefix?'fpm-':''}${name}`
+    const cmsProjectPath = path.join(dir, projName)
+    if(fs.existsSync(localDir)){
       // copy from disk
-      copydir(TEMPLATE_DIR[template], cmsProjectPath);
-      init(cmsProjectName)
+      copydir(localDir, cmsProjectPath);
+      init(projName)
       return;
     }
     console.info('Download The Lasted Template Project.')
-    download(GIT_REP[template], TEMPLATE_DIR[template], (err) => {
+    download(gitRep, localDir, (err) => {
       if(err){
         console.error(err);
         return;
       }
-      copydir(TEMPLATE_DIR[template], cmsProjectPath);
-      init(cmsProjectName)
+      copydir(localDir, cmsProjectPath);
+      init(projName)
     })
   })
 

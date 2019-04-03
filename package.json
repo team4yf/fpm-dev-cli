@@ -1,14 +1,14 @@
 {
-  "name": "fpm-cms-dev-cli",
-  "version": "0.0.2",
-  "description": "fpm-cms-dev-cli",
+  "name": "fpm-dev-cli",
+  "version": "1.0.0",
+  "description": "用于创建FPM模板项目的脚手架工具",
   "main": "cli.js",
   "scripts": {
-    "test": "node ./cli.js -v update"
+    "test": "node ./cli.js update"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/team4yf/fpm-cms-dev-cli.git"
+    "url": "git+https://github.com/team4yf/fpm-dev-cli.git"
   },
   "keywords": [
     "fpm-dev",
@@ -17,13 +17,13 @@
   "author": "yfsoftcom",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/team4yf/fpm-cms-dev-cli/issues"
+    "url": "https://github.com/team4yf/fpm-dev-cli/issues"
   },
   "preferGlobal": true,
   "bin": {
-    "fpm-cms": "cli.js"
+    "fpm-dev": "cli.js"
   },
-  "homepage": "https://github.com/team4yf/fpm-cms-dev-cli#readme",
+  "homepage": "https://github.com/team4yf/fpm-dev-cli#readme",
   "dependencies": {
     "commander": "^2.9.0",
     "download-git-repo": "^1.0.2",
